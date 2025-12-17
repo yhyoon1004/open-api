@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    username: ${MYSQL_APP_USERNAME}
+    password: ${MYSQL_APP_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+env:
+  api_key: ${OPEN_API_KEY}

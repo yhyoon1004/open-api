@@ -1,0 +1,15 @@
+name: open-api
+services:
+  mariadb:
+    image: 'mariadb:latest'
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_USER: ${MYSQL_APP_USERNAME}
+      MARIADB_PASSWORD: ${MYSQL_APP_PASSWORD}
+    ports:
+      - '3306'
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
