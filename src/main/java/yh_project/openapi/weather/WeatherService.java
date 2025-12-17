@@ -13,7 +13,6 @@ import yh_project.openapi.weather.dto.TimeParamDTO;
 import yh_project.openapi.weather.dto.WeatherItemDTO;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,28 +37,29 @@ public class WeatherService {
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
 
         TimeParamDTO fcstDTParam = TimeUtil.getDateTimeDTOOfUltraSrtFcst();
-
+        String nowFcstHour = TimeUtil.getFcstHour();
 
         //지역 별 api 요청
         for (Region region : Region.values()) {
             //초단기예보 (하늘 상태 정보) 요청
             URI fcstURI = this.getUltraSrtFcstURI(fcstDTParam, region);
-            RestClient.ResponseSpec httpResponse = restClient
+            ResponseEntity<FcstResDTO> response = restClient
                     .get()
                     .uri(fcstURI)
-                    .retrieve();
-            ResponseEntity<FcstResDTO> response = httpResponse.toEntity(FcstResDTO.class);
+                    .retrieve()
+                    .toEntity(FcstResDTO.class);
+
             //비정상 응답시
             if (!response.getStatusCode().is2xxSuccessful()) return null;
 
-            FcstResDTO resBodyOfFcst = httpResponse.body(FcstResDTO.class);
+            FcstResDTO resBodyOfFcst = response.getBody();
 
             WeatherItemDTO regionWeather = new WeatherItemDTO();
             regionWeather.setRegion(region.getName());
             //정상적으로 api 응답받았을 경우
             if (resBodyOfFcst != null) {
                 for (FcstResDTO.Item item : resBodyOfFcst.getResponse().getBody().getItems().getItem()) {
-                    if (item.getFcstTime().equals(fcstDTParam.getTime())) {
+                    if (item.getFcstTime().equals(nowFcstHour)) {
                         //예보시간 초기화
                         regionWeather.setTime(item.getFcstTime());
 
@@ -117,12 +117,8 @@ public class WeatherService {
                 }//end else
             }//end out if
             currentWeatherList.add(regionWeather);
-            try {
-                Thread.sleep(400);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
         }
+
         cacheManageService.put("weather", "", currentWeatherList);
 
         return currentWeatherList;

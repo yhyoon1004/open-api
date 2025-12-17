@@ -19,7 +19,7 @@ public class WeatherJob {
         log.info("_____Weather Job Start_____");
         List<WeatherItemDTO> currentWeather = weatherService.getCurrentWeather();
         WeatherItemDTO first = currentWeather.getFirst();
-        log.info("api request base time = " + first.getTime());
+        log.info("api request forecast time = " + first.getTime());
         log.info("_____Weather Job End_____");
     }
 }
