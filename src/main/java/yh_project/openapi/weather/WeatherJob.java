@@ -14,12 +14,12 @@ import java.util.List;
 public class WeatherJob {
     private final WeatherService weatherService;
 
-    @Scheduled(cron = "0 */15 * * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 */30 * * * *", zone = "Asia/Seoul")
     public void weatherJob() {
         log.info("_____Weather Job Start_____");
         List<WeatherItemDTO> currentWeather = weatherService.getCurrentWeather();
         WeatherItemDTO first = currentWeather.getFirst();
-        log.info("api request forecast time = " + first.getTime());
+        log.info("api response data first = " + first);
         log.info("_____Weather Job End_____");
     }
 }

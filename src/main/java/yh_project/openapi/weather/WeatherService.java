@@ -31,7 +31,6 @@ public class WeatherService {
      * 현재 날씨 정보 서비스 로직
      * - 공공API에서 초단기예보를 지역 별로 호출해 하늘, 우천, 온도 정보를 받아옴
      */
-//    @Cacheable(cacheNames = "weather")
     public List<WeatherItemDTO> getCurrentWeather() {
 
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
@@ -39,10 +38,17 @@ public class WeatherService {
         TimeParamDTO fcstDTParam = TimeUtil.getDateTimeDTOOfUltraSrtFcst();
         String nowFcstHour = TimeUtil.getFcstHour();
 
+        log.info("fcstDTParam = " + fcstDTParam);
+        log.info("nowFcstHour = " + nowFcstHour);
+
         //지역 별 api 요청
         for (Region region : Region.values()) {
+
+            long t0 = System.nanoTime();
+
             //초단기예보 (하늘 상태 정보) 요청
             URI fcstURI = this.getUltraSrtFcstURI(fcstDTParam, region);
+
             ResponseEntity<FcstResDTO> response = restClient
                     .get()
                     .uri(fcstURI)
@@ -56,8 +62,9 @@ public class WeatherService {
 
             WeatherItemDTO regionWeather = new WeatherItemDTO();
             regionWeather.setRegion(region.getName());
+
             //정상적으로 api 응답받았을 경우
-            if (resBodyOfFcst != null) {
+            if (resBodyOfFcst != null && resBodyOfFcst.getResponse().getBody() != null) {
                 for (FcstResDTO.Item item : resBodyOfFcst.getResponse().getBody().getItems().getItem()) {
                     if (item.getFcstTime().equals(nowFcstHour)) {
                         //예보시간 초기화
@@ -81,7 +88,7 @@ public class WeatherService {
                 //비 or 눈 상태
                 String pty = regionWeather.getPty();
                 //비가 안내릴 경우
-                if (pty == null ||pty.isEmpty() || pty.equals("0")) {
+                if (pty == null || pty.isEmpty() || pty.equals("0")) {
                     //하늘상태(SKY) 코드 : 맑음(1), 구름많음(3), 흐림(4)
                     if (regionWeather.getSky() == null) regionWeather.setSky("0");
                     switch (regionWeather.getSky()) {
@@ -117,6 +124,18 @@ public class WeatherService {
                 }//end else
             }//end out if
             currentWeatherList.add(regionWeather);
+
+            long t1 = System.nanoTime();
+            log.info(region.getName() + " api response time = " + (t1 - t0) / 1000000 + "ms");
+
+            // 429 문제로 지역별 api 호출 후 0.5초간 대기
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt(); // 인터럽트 복구
+                log.warn("Weather job interrupted while sleeping between API calls.", ie);
+                break; // 혹은 continue; 상황에 맞게 처리
+            }
         }
 
         cacheManageService.put("weather", "", currentWeatherList);

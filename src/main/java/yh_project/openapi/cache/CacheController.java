@@ -17,7 +17,6 @@ public class CacheController {
 
     @RequestMapping("/get/{key}")
     public ResponseEntity<?> getCache(@PathVariable String key){
-        System.out.println("key = " + key);
         List<WeatherItemDTO> data = cacheManageService.get(key, "", List.class);
         return ResponseEntity.ok().body(data);
     }
