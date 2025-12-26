@@ -17,7 +17,7 @@ public class WeatherJob {
     @Scheduled(cron = "0 */30 * * * *", zone = "Asia/Seoul")
     public void weatherJob() {
         log.info("_____Weather Job Start_____");
-        List<WeatherItemDTO> currentWeather = weatherService.getCurrentWeather();
+        List<WeatherItemDTO> currentWeather = weatherService.getWeatherForecast();
         WeatherItemDTO first = currentWeather.getFirst();
         log.info("api response data first = " + first);
         log.info("_____Weather Job End_____");

@@ -1,10 +1,38 @@
+env:
+  api_key: ${OPEN_API_KEY}
+
+# 공통
 spring:
+  profiles:
+    default: dev
   datasource:
     username: ${MYSQL_APP_USERNAME}
     password: ${MYSQL_APP_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
-
-env:
-  api_key: ${OPEN_API_KEY}
+---
+# 개발
+spring:
+  config:
+    activate:
+      on-profile: dev
+  docker:
+    compose:
+      enabled: true
+---
+# 운영
+spring:
+  config:
+    activate:
+      on-profile: prod
+  docker:
+    compose:
+      enabled: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL:false}

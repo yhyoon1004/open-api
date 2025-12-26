@@ -25,7 +25,7 @@ public class WeatherController {
 
         if (cacheData != null) return ResponseEntity.ok().body(cacheData);
 
-        List<WeatherItemDTO> data = weatherService.getCurrentWeather();
+        List<WeatherItemDTO> data = weatherService.getWeatherForecast();
         if (data == null) return ResponseEntity.internalServerError().build();
         return ResponseEntity.ok().body(data);
     }

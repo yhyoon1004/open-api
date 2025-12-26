@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import yh_project.openapi.cache.CacheManageService;
 import yh_project.openapi.util.TimeUtil;
@@ -15,6 +16,8 @@ import yh_project.openapi.weather.dto.WeatherItemDTO;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Service
@@ -31,7 +34,7 @@ public class WeatherService {
      * 현재 날씨 정보 서비스 로직
      * - 공공API에서 초단기예보를 지역 별로 호출해 하늘, 우천, 온도 정보를 받아옴
      */
-    public List<WeatherItemDTO> getCurrentWeather() {
+    public List<WeatherItemDTO> getWeatherForecast() {
 
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
 
@@ -49,14 +52,10 @@ public class WeatherService {
             //초단기예보 (하늘 상태 정보) 요청
             URI fcstURI = this.getUltraSrtFcstURI(fcstDTParam, region);
 
-            ResponseEntity<FcstResDTO> response = restClient
-                    .get()
-                    .uri(fcstURI)
-                    .retrieve()
-                    .toEntity(FcstResDTO.class);
+            ResponseEntity<FcstResDTO> response = getWeatherAPI(fcstURI);
 
             //비정상 응답시
-            if (!response.getStatusCode().is2xxSuccessful()) return null;
+            if (response == null) return null;
 
             FcstResDTO resBodyOfFcst = response.getBody();
 
@@ -127,15 +126,6 @@ public class WeatherService {
 
             long t1 = System.nanoTime();
             log.info(region.getName() + " api response time = " + (t1 - t0) / 1000000 + "ms");
-
-            // 429 문제로 지역별 api 호출 후 0.5초간 대기
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt(); // 인터럽트 복구
-                log.warn("Weather job interrupted while sleeping between API calls.", ie);
-                break; // 혹은 continue; 상황에 맞게 처리
-            }
         }
 
         cacheManageService.put("weather", "", currentWeatherList);
@@ -151,7 +141,7 @@ public class WeatherService {
         String url = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst" +
                 "?serviceKey=" + apikey +
                 "&pageNo=1" +
-                "&numOfRows=100" +
+                "&numOfRows=60" +
                 "&dataType=JSON" +
                 "&base_date=" + dateTimeParam.getDate() +
                 "&base_time=" + dateTimeParam.getTime() +        // 0600 대신 단기예보 발표 시각인 0500 사용 권장
@@ -160,6 +150,25 @@ public class WeatherService {
         return URI.create(url);
     }
 
+    public ResponseEntity<FcstResDTO> getWeatherAPI(URI uri) {
+        ResponseEntity<FcstResDTO> response = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                response = restClient
+                        .get()
+                        .uri(uri)
+                        .retrieve()
+                        .toEntity(FcstResDTO.class);
+                sleep(1000);
+            } catch (HttpClientErrorException.TooManyRequests e) {
+                log.info("api 429 error (try :{})  :  {}", i + 1, e.getMessage());
+                response = null;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
 
+        }
+        return response;
+    }
 
 }
