@@ -152,21 +152,24 @@ public class WeatherService {
 
     public ResponseEntity<FcstResDTO> getWeatherAPI(URI uri) {
         ResponseEntity<FcstResDTO> response = null;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
                 response = restClient
                         .get()
                         .uri(uri)
                         .retrieve()
                         .toEntity(FcstResDTO.class);
-                sleep(1000);
+                if (response.getStatusCode().is2xxSuccessful()) return response;
             } catch (HttpClientErrorException.TooManyRequests e) {
                 log.info("api 429 error (try :{})  :  {}", i + 1, e.getMessage());
                 response = null;
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                try {
+                    log.info("wait 1sec");
+                    sleep(1000);
+                } catch (InterruptedException e2) {
+                    throw new RuntimeException(e2);
+                }
             }
-
         }
         return response;
     }
