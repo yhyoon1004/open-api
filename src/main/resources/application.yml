@@ -4,7 +4,7 @@ env:
 # 공통
 spring:
   profiles:
-    default: dev
+    default: devcc
   datasource:
     username: ${MYSQL_APP_USERNAME}
     password: ${MYSQL_APP_PASSWORD}

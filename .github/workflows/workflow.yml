@@ -58,4 +58,4 @@ jobs:
             set -e
             cd ~/app
             sudo -S fuser -k -n tcp 8080||true
-            nohup java -jar -Dspring.profiles.active=prod open-api-v1.jar > open-api.log 2>&1 &
+            nohup java -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
