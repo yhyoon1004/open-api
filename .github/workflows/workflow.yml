@@ -58,6 +58,7 @@ jobs:
             set -e
             cd ~/app
             sudo -S fuser -k -n tcp 8080||true
+            export OPEN_API_KEY="${{ secrets.OPEN_API_KEY }}"
             export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
             export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
             export MYSQL_APP_USERNAME="${{ secrets.MYSQL_APP_USERNAME }}"
