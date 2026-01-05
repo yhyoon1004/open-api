@@ -65,4 +65,4 @@ jobs:
             export MYSQL_APP_PASSWORD="${{ secrets.MYSQL_APP_PASSWORD }}"
             export REDIS_HOST="${{ secrets.REDIS_HOST }}"
             export REDIS_PORT="${{ secrets.REDIS_PORT }}"
-            nohup java -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
+            nohup java -Duser.timezone=Asia/Seoul -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
