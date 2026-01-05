@@ -1,7 +1,7 @@
 name: open-api-ci-cd
 on:
   push:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   build:
@@ -58,5 +58,11 @@ jobs:
             set -e
             cd ~/app
             sudo -S fuser -k -n tcp 8080||true
-            env
-            sudo nohup java -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
+            export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
+            export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
+            export MYSQL_APP_USERNAME="${{ secrets.MYSQL_APP_USERNAME }}"
+            export MYSQL_APP_PASSWORD="${{ secrets.MYSQL_APP_PASSWORD }}"
+            export REDIS_HOST="${{ secrets.REDIS_HOST }}"
+            export REDIS_PORT="${{ secrets.REDIS_PORT }}"
+            export REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+            nohup java -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
