@@ -15,8 +15,9 @@ public class TimeUtil {
     }
 
     public static final String getFcstHour() {
-        LocalDateTime now = LocalDateTime.now().plusHours(1L);
-        return String.format("%02d%02d", now.getHour(), 0);
+        // 예보 시각을 현재 + 30분 기준으로 맞춤
+        LocalDateTime now = LocalDateTime.now().plusMinutes(30);
+        String minute = now.getMinute() >= 30 ? "30" : "00";
+        return String.format("%02d%s", now.getHour(), minute);
     }
-
 }
