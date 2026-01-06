@@ -41,6 +41,9 @@ public class WeatherService {
         TimeParamDTO dateTimeParam = TimeUtil.getDateTimeParamOfUltraSrtFcst();
         String fcstTime = TimeUtil.getForecastDateTimeNow();
 
+        log.info("dateTimeParam = " + dateTimeParam);
+        log.info("fcstTime = " + fcstTime);
+
         //지역 별 api 요청
         for (Region region : Region.values()) {
 
