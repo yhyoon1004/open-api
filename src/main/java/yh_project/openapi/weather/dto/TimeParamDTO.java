@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class TimeParamDTO {
-    private String date;
-    private String time;
+    private String baseDate;
+    private String baseTime;
 }

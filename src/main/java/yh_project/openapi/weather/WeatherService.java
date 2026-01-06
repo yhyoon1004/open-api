@@ -38,10 +38,10 @@ public class WeatherService {
 
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
 
-        TimeParamDTO dateTimeParam = TimeUtil.getDateTimeParamOfUltraSrtFcst();
+        TimeParamDTO baseDateTimeParam = TimeUtil.getDateTimeParamOfUltraSrtFcst();
         String fcstTime = TimeUtil.getForecastDateTimeNow();
 
-        log.info("dateTimeParam = " + dateTimeParam);
+        log.info("BaseDateTimeParam = " + baseDateTimeParam);
         log.info("fcstTime = " + fcstTime);
 
         //지역 별 api 요청
@@ -50,7 +50,7 @@ public class WeatherService {
             long t0 = System.nanoTime();
 
             //초단기예보 (하늘 상태 정보) 요청
-            URI fcstURI = this.getUltraSrtFcstURI(dateTimeParam, region);
+            URI fcstURI = this.getUltraSrtFcstURI(baseDateTimeParam, region);
             ResponseEntity<FcstResDTO> response = getWeatherAPI(fcstURI);
 
             //비정상 응답시
@@ -142,8 +142,8 @@ public class WeatherService {
                 "&pageNo=1" +
                 "&numOfRows=60" +
                 "&dataType=JSON" +
-                "&base_date=" + dateTimeParam.getDate() +
-                "&base_time=" + dateTimeParam.getTime() +        // 0600 대신 단기예보 발표 시각인 0500 사용 권장
+                "&base_date=" + dateTimeParam.getBaseDate() +
+                "&base_time=" + dateTimeParam.getBaseTime() +        // 0600 대신 단기예보 발표 시각인 0500 사용 권장
                 "&nx=" + region.getNx() +
                 "&ny=" + region.getNy();
         return URI.create(url);

@@ -7,19 +7,24 @@ import java.time.format.DateTimeFormatter;
 
 public class TimeUtil {
 
+
+    /**
+     * 매 시 30분에 날씨정보 생성  -> 45분에 api 제공됨
+     * 현재시간이 45분 이후면 시간은 현재 시간값, 이전이면 1시간 전 시간값으로 처리
+     * */
     public static TimeParamDTO getDateTimeParamOfUltraSrtFcst() {
         LocalDateTime now = LocalDateTime.now();
-        String dateField = now.format(DateTimeFormatter.BASIC_ISO_DATE);
+        String baseDate = now.format(DateTimeFormatter.BASIC_ISO_DATE);
 
-        //현재시간이 45분 이후면 시간은 현재 시간값, 이전이면 1시간 전 시간값으로 처리
         int hour = (now.getMinute() >= 45) ? now.getHour() : now.minusHours(1).getHour();
-        String hhmm = String.format("%02d%02d", hour, 30);
-        return TimeParamDTO.builder().date(dateField).time(hhmm).build();
+        String baseTime = String.format("%02d%02d", hour, 30);
+
+        return TimeParamDTO.builder().baseDate(baseDate).baseTime(baseTime).build();
     }
 
     public static String getForecastDateTimeNow() {
         LocalDateTime now = LocalDateTime.now();
-        int mm = (now.getMinute() >= 30) ? 30 : 00;
-        return String.format("%02d%02d", now.getHour(), mm);
+        int hour = now.plusHours(1).getHour();
+        return String.format("%02d%02d", hour, 00);
     }
 }

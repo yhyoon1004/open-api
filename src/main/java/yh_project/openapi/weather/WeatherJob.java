@@ -18,7 +18,7 @@ public class WeatherJob {
     public void weatherJob() {
         log.info("_____Weather Job Start_____");
         List<WeatherItemDTO> currentWeather = weatherService.getWeatherForecast();
-        log.info("api response data = {}", currentWeather);
+        log.info("- api response data - \n {}", currentWeather);
         log.info("_____Weather Job End_____");
     }
 }
