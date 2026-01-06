@@ -38,9 +38,8 @@ public class WeatherService {
 
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
 
-        TimeParamDTO fcstDTParam = TimeUtil.getDateTimeDTOOfUltraSrtFcst();
-
-        log.info("fcstDTParam = " + fcstDTParam);
+        TimeParamDTO dateTimeParam = TimeUtil.getDateTimeParamOfUltraSrtFcst();
+        String fcstTime = TimeUtil.getForecastDateTimeNow();
 
         //지역 별 api 요청
         for (Region region : Region.values()) {
@@ -48,8 +47,7 @@ public class WeatherService {
             long t0 = System.nanoTime();
 
             //초단기예보 (하늘 상태 정보) 요청
-            URI fcstURI = this.getUltraSrtFcstURI(fcstDTParam, region);
-
+            URI fcstURI = this.getUltraSrtFcstURI(dateTimeParam, region);
             ResponseEntity<FcstResDTO> response = getWeatherAPI(fcstURI);
 
             //비정상 응답시
@@ -63,7 +61,7 @@ public class WeatherService {
             //정상적으로 api 응답받았을 경우
             if (resBodyOfFcst != null && resBodyOfFcst.getResponse().getBody() != null) {
                 for (FcstResDTO.Item item : resBodyOfFcst.getResponse().getBody().getItems().getItem()) {
-                    if (item.getFcstTime().equals(fcstDTParam.getTime())) {
+                    if (item.getFcstTime().equals(fcstTime)) {
                         //예보시간 초기화
                         regionWeather.setTime(item.getFcstTime());
 

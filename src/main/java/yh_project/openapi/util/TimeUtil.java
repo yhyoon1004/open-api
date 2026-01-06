@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 public class TimeUtil {
 
-    public static TimeParamDTO getDateTimeDTOOfUltraSrtFcst() {
+    public static TimeParamDTO getDateTimeParamOfUltraSrtFcst() {
         LocalDateTime now = LocalDateTime.now();
         String dateField = now.format(DateTimeFormatter.BASIC_ISO_DATE);
 
@@ -15,5 +15,11 @@ public class TimeUtil {
         int hour = (now.getMinute() >= 45) ? now.getHour() : now.minusHours(1).getHour();
         String hhmm = String.format("%02d%02d", hour, 30);
         return TimeParamDTO.builder().date(dateField).time(hhmm).build();
+    }
+
+    public static String getForecastDateTimeNow() {
+        LocalDateTime now = LocalDateTime.now();
+        int mm = (now.getMinute() >= 30) ? 30 : 00;
+        return String.format("%02d%02d", now.getHour(), mm);
     }
 }
