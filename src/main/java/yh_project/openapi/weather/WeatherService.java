@@ -39,10 +39,8 @@ public class WeatherService {
         List<WeatherItemDTO> currentWeatherList = new ArrayList<>();
 
         TimeParamDTO fcstDTParam = TimeUtil.getDateTimeDTOOfUltraSrtFcst();
-        String nowFcstHour = TimeUtil.getFcstHour();
 
         log.info("fcstDTParam = " + fcstDTParam);
-        log.info("nowFcstHour = " + nowFcstHour);
 
         //지역 별 api 요청
         for (Region region : Region.values()) {
@@ -65,7 +63,7 @@ public class WeatherService {
             //정상적으로 api 응답받았을 경우
             if (resBodyOfFcst != null && resBodyOfFcst.getResponse().getBody() != null) {
                 for (FcstResDTO.Item item : resBodyOfFcst.getResponse().getBody().getItems().getItem()) {
-                    if (item.getFcstTime().equals(nowFcstHour)) {
+                    if (item.getFcstTime().equals(fcstDTParam.getTime())) {
                         //예보시간 초기화
                         regionWeather.setTime(item.getFcstTime());
 

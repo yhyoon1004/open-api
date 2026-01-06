@@ -14,7 +14,7 @@ import java.util.List;
 public class WeatherJob {
     private final WeatherService weatherService;
 
-    @Scheduled(cron = "0 */30 * * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 45 * * * *", zone = "Asia/Seoul")
     public void weatherJob() {
         log.info("_____Weather Job Start_____");
         List<WeatherItemDTO> currentWeather = weatherService.getWeatherForecast();

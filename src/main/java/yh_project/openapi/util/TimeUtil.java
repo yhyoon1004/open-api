@@ -8,16 +8,12 @@ import java.time.format.DateTimeFormatter;
 public class TimeUtil {
 
     public static TimeParamDTO getDateTimeDTOOfUltraSrtFcst() {
-        LocalDateTime now = LocalDateTime.now().minusMinutes(30);
-        String dateField = now.format(DateTimeFormatter.BASIC_ISO_DATE);
-        String timeField = String.format("%02d%02d", now.getHour(), now.getMinute() >= 30 ? 30 : 0);
-        return TimeParamDTO.builder().date(dateField).time(timeField).build();
-    }
-
-    public static final String getFcstHour() {
-        // 예보 시각을 현재 + 30분 기준으로 맞춤
         LocalDateTime now = LocalDateTime.now();
-        String minute = now.getMinute() >= 30 ? "30" : "00";
-        return String.format("%02d%s", now.getHour(), minute);
+        String dateField = now.format(DateTimeFormatter.BASIC_ISO_DATE);
+
+        //현재시간이 45분 이후면 시간은 현재 시간값, 이전이면 1시간 전 시간값으로 처리
+        int hour = (now.getMinute() >= 45) ? now.getHour() : now.minusHours(1).getHour();
+        String hhmm = String.format("%02d%02d", hour, 30);
+        return TimeParamDTO.builder().date(dateField).time(hhmm).build();
     }
 }
