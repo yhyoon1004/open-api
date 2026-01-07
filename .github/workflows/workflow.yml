@@ -48,7 +48,7 @@ jobs:
           source: "artifact/*.jar"
           target: "~/app"
 
-      - name: Restart app on EC2
+      - name: Restart app on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
