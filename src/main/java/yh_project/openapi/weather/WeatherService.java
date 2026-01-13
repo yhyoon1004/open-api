@@ -25,7 +25,7 @@ import static java.lang.Thread.sleep;
 @RequiredArgsConstructor
 public class WeatherService {
 
-    private static final int MAX_RETRY = 3; // 재시도 횟수 조정
+    private static final int MAX_RETRY = 5; // 재시도 횟수 조정
     private static final Duration RETRY_DELAY = Duration.ofMillis(500);
 
     @Value("${env.api_key}")
@@ -78,13 +78,13 @@ public class WeatherService {
                         case "T1H": // 기온
                             tempT1H = item.getFcstValue();
                             break;
-                        case "SKY": // 하늘상태 (1:맑음, 3:구름많음, 4:흐림) [cite: 72, 74]
+                        case "SKY": // 하늘상태 (1:맑음, 3:구름많음, 4:흐림) [
                             codeSKY = item.getFcstValue();
                             break;
-                        case "PTY": // 강수형태 (0:없음, 1:비, 2:비/눈, 3:눈, 5:빗방울, 6:빗방울눈날림, 7:눈날림) [cite: 72, 75]
+                        case "PTY": // 강수형태 (0:없음, 1:비, 2:비/눈, 3:눈, 5:빗방울, 6:빗방울눈날림, 7:눈날림)
                             codePTY = item.getFcstValue();
                             break;
-                        case "LGT": // 낙뢰 (kA) [cite: 72, 91]
+                        case "LGT": // 낙뢰 (kA)
                             codeLGT = item.getFcstValue();
                             break;
                     }
@@ -112,39 +112,48 @@ public class WeatherService {
     /**
      * 날씨 상태 결정 로직 (우선순위: 번개 > 비/눈 > 흐림/맑음)
      */
-    private String determineWeatherStatus(String sky, String pty, String lgt) {
-        // 1. 낙뢰 체크 (LGT 값이 존재하고 0보다 크면 번개) [cite: 91]
-        // API 문서상 LGT는 kA 단위 에너지 밀도. 0이 아니면 낙뢰 가능성 있음.
+    private WeatherStatus determineWeatherStatus(String sky, String pty, String lgt) {
+        // 1. 낙뢰 체크 (LGT)
+        // API 명세: 초단기예보에서 LGT 단위는 kA(킬로암페어)
         if (lgt != null) {
             try {
                 double lgtValue = Double.parseDouble(lgt);
-                if (lgtValue > 0) return "번개";
+                if (lgtValue > 0) return WeatherStatus.LIGHTNING;
             } catch (NumberFormatException ignored) {}
         }
 
-        // 2. 강수 형태 체크 (PTY) [cite: 75]
+        // 2. 강수 형태 체크 (PTY)
+        // API 명세: 0(없음), 1(비), 2(비/눈), 3(눈), 5(빗방울), 6(빗방울눈날림), 7(눈날림)
         if (pty != null && !pty.equals("0")) {
             switch (pty) {
-                case "1": case "5": return "비";
-                case "2": case "6": return "비/눈"; // 사용자 요청에 따라 "진눈깨비" 대신 "비/눈"
-                case "3": case "7": return "눈";
+                case "3":
+                case "7":
+                    return WeatherStatus.SNOW;
+                case "2":
+                case "6":
+                    return WeatherStatus.RAIN_SNOW;
+                case "1":
+                case "5":
+                default:
+                    return WeatherStatus.RAIN;
             }
         }
 
-        // 3. 하늘 상태 체크 (SKY) [cite: 74]
+        // 3. 하늘 상태 체크 (SKY)
+        // API 명세: 1(맑음), 3(구름많음), 4(흐림)
         if (sky != null) {
             switch (sky) {
-                case "1": return "맑음";
-                case "3": return "구름많음";
-                case "4": return "흐림";
+                case "4": return WeatherStatus.OVERCAST;
+                case "3": return WeatherStatus.CLOUDY;
+                case "1": return WeatherStatus.SUNNY;
             }
         }
 
-        return "정보없음";
+        return WeatherStatus.UNKNOWN;
     }
 
     private URI getUltraSrtFcstURI(TimeParamDTO dateTimeParam, Region region) {
-        // API 가이드에 따라 필수 파라미터 조합 [cite: 37]
+        // API 가이드에 따라 필수 파라미터 조합
         String url = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst" +
                 "?serviceKey=" + apikey +
                 "&pageNo=1" +
