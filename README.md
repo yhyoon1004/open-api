@@ -9,18 +9,27 @@ packages:
   - ca-certificates
   - curl
   - gnupg
+  - lsb-release
+  - nginx
+  - redis-tools
+  - mariadb-client
+  - net-tools
+  - certbot
+  - python3-certbot-nginx
 
 write_files:
-  - path: /usr/local/bin/install-docker.sh
+  - path: /usr/local/bin/bootstrap.sh
     permissions: "0755"
     content: |
       #!/usr/bin/env bash
       set -euxo pipefail
 
-      # 1) old packages remove (if any)
+      export DEBIAN_FRONTEND=noninteractive
+
+      # Remove old docker packages (ignore errors)
       apt-get remove -y docker docker-engine docker.io containerd runc || true
 
-      # 2) docker gpg + repo
+      # Docker official repo + GPG
       install -m 0755 -d /etc/apt/keyrings
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
       chmod a+r /etc/apt/keyrings/docker.gpg
@@ -31,34 +40,31 @@ write_files:
         > /etc/apt/sources.list.d/docker.list
 
       apt-get update
-      apt-get install -y nginx
-      apt-get install -y core
-      apt-get install -y redis-tools
-      apt-get install -y mariadb-client
-      apt-get install -y openjdk-21-jdk
-      apt-get install -y net-tools
+
+      # Install Docker
       apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-      # 4) start & enable
+      # Install Java (try 21, fallback to 17)
+      apt-get install -y openjdk-21-jdk || apt-get install -y openjdk-17-jdk
+
+      # Enable/start services
       systemctl enable --now docker
       systemctl enable --now nginx
 
-      #5) let's encrpt 봇 설정
-      snap install core
-      snap refresh core
-      snap install --classic certbot
-      ln -s /snap/bin/certbot /usr/bin/certbot
-
+      # Print versions
       docker --version
       docker compose version || true
+      nginx -v || true
+      java -version || true
 
 runcmd:
-  - [ bash, -lc, "/usr/local/bin/install-docker.sh" ]
+  - [ bash, -lc, "/usr/local/bin/bootstrap.sh" ]
   - [ bash, -lc, "usermod -aG docker azureuser || true" ]
   - [ bash, -lc, "docker run --rm hello-world || true" ]
 
 final_message: |
-  cloud-init finished: Docker installed.
+  cloud-init finished: nginx, docker, tools, and certbot installed.
+
 ```
 
 
@@ -84,6 +90,18 @@ sudo systemctl reload nginx
 
 2. 인증서 발급
 ```bash
+sudo apt update
+sudo apt install -y snapd
+sudo snap install core
+sudo snap refresh core
+
+# (혹시 예전에 apt로 certbot 깔았으면 충돌 방지로 제거)
+sudo apt remove -y certbot
+
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+certbot --version
+
 sudo certbot --nginx -d example.com -d www.example.com
 ```
 
@@ -122,4 +140,26 @@ server {
     return 301 https://$host$request_uri;
 }
 ```   
+# mariadb install
+```bash
+sudo apt update
+sudo apt install -y curl ca-certificates
+```
+   
+```bash
+curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup \
+ | sudo bash -s -- --mariadb-server-version="mariadb-12.1.2"
 
+```
+   
+```bash
+sudo apt update
+sudo apt install -y mariadb-server mariadb-client mariadb-backup
+```
+
+
+```bash
+sudo systemctl enable --now mariadb
+sudo systemctl status mariadb
+```
+   
