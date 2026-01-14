@@ -39,14 +39,15 @@ jobs:
           name: open-api-jar
           path: artifact
 
-      - name: Copy jar to EC2
+      - name: Copy jar to Server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          proxy_host: ${{ secrets.API_HOST }}
           source: "artifact/*.jar"
-          target: "~/app"
+          target: "~/open-api"
 
       - name: Restart app on server
         uses: appleboy/ssh-action@v1.0.3
@@ -54,6 +55,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          proxy_host: ${{ secrets.API_HOST }}
           script: |
             set -e
             cd ~/app
@@ -61,8 +63,8 @@ jobs:
             export OPEN_API_KEY="${{ secrets.OPEN_API_KEY }}"
             export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
             export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
-            export MYSQL_APP_USERNAME="${{ secrets.MYSQL_APP_USERNAME }}"
-            export MYSQL_APP_PASSWORD="${{ secrets.MYSQL_APP_PASSWORD }}"
+            export MYSQL_APP_USERNAME="${{ secrets.MYSQL_USERNAME }}"
+            export MYSQL_APP_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
             export REDIS_HOST="${{ secrets.REDIS_HOST }}"
             export REDIS_PORT="${{ secrets.REDIS_PORT }}"
-            nohup java -Duser.timezone=Asia/Seoul -jar -Dspring.profiles.active=prod ~/app/artifact/open-api-v1.jar > ~/app/open-api.log 2>&1 &
+            nohup java -Duser.timezone=Asia/Seoul -jar -Dspring.profiles.active=prod ~/open-api/artifact/open-api-v1.jar > ~/open-api/open-api.log 2>&1 &
