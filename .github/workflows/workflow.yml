@@ -42,20 +42,20 @@ jobs:
       - name: Copy jar to Server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.API_HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          proxy_host: ${{ secrets.API_HOST }}
+          proxy_host: ${{ secrets.HOST }}
           source: "artifact/*.jar"
           target: "~/open-api"
 
       - name: Restart app on server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.API_HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          proxy_host: ${{ secrets.API_HOST }}
+          proxy_host: ${{ secrets.HOST }}
           script: |
             set -e
             cd ~/open-api
