@@ -66,9 +66,8 @@ jobs:
             sudo -S fuser -k -n tcp 8080||true
             export OPEN_API_KEY="${{ secrets.OPEN_API_KEY }}"
             export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
-            export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
-            export MYSQL_APP_USERNAME="${{ secrets.MYSQL_USERNAME }}"
-            export MYSQL_APP_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
+            export MYSQL_USERNAME="${{ secrets.MYSQL_USERNAME }}"
+            export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
             export REDIS_HOST="${{ secrets.REDIS_HOST }}"
             export REDIS_PORT="${{ secrets.REDIS_PORT }}"
             nohup java -Duser.timezone=Asia/Seoul -jar -Dspring.profiles.active=prod ~/open-api/artifact/open-api-v1.jar > ~/open-api/open-api.log 2>&1 &
