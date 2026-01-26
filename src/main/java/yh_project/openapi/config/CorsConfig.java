@@ -13,7 +13,6 @@ public class CorsConfig implements WebMvcConfigurer {
                 "http://localhost:3000",
                 "https://dev.renteasy.co.kr",
                 "https://yunhwan.kr",
-                "https://yunhwan.kr",
                 "https://www.yunhwan.kr",
                 "https://renteasy.yunhwan.kr",
                 "https://renteasy.co.kr",
