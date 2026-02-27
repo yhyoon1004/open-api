@@ -65,7 +65,9 @@ jobs:
             cd ~/open-api
             sudo -S fuser -k -n tcp 8080||true
             export OPEN_API_KEY="${{ secrets.OPEN_API_KEY }}"
+            export AI_API_KEY="${{ secrets.AI_API_KEY }}"
             export MYSQL_HOST="${{ secrets.MYSQL_HOST }}"
+            export MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}"
             export MYSQL_USERNAME="${{ secrets.MYSQL_USERNAME }}"
             export MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
             export REDIS_HOST="${{ secrets.REDIS_HOST }}"
