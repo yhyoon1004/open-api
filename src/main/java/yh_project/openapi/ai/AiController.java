@@ -1,6 +1,7 @@
 package yh_project.openapi.ai;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
