@@ -13,7 +13,7 @@ public class RecruitmentInquiryController {
 
     private final RecruitmentInquiryService recruitmentInquiryService;
 
-    @PostMapping
+    @PostMapping(value = "/", consumes = "application/json")
     public ResponseEntity<Long> save(@RequestBody RecruitmentInquiryDto requestDto) {
         return ResponseEntity.ok(recruitmentInquiryService.save(requestDto));
     }
